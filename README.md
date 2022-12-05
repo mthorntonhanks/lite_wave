@@ -1,13 +1,14 @@
 # lite_wave Introduction
 lite_wave is a Python module for reading and writing sound files in the WAVE format.
 
-It is intended to be a stable and easy-to-use building block for manipulating wav files in Python code, without needing to know how to load a file from storage, or to save a file to storage. 
+It is intended as a stable, easy-to-use building block for manipulating wav files, without needing to know how to load a file from disk / storage, or to save a file to storage. 
 
 We encourage contributions and enhancements which:
  - make it easier for client code to work with wav_file objects
+ - fix bugs
  - improve the performance or efficiency
 
-We are not looking for contributions which 'bloat' the module beyond its basic purpose of reading and writing sound files. It's the job of the user / developer to write their own modules to do funky sound manipulations :)
+We are not looking for contributions which 'bloat' the module beyond its basic purpose of ***reading and writing wav files***. It's the job of the user / developer to write their own modules to do funky sound manipulations :)
 
 # lite_wave Usage
 Examples of things you can do using lite_wave in your Python code include:
@@ -21,7 +22,7 @@ f = lw.load('sound_file.wav')
 print(f'sample rate: {f.sample_rate}')
 ```
 
-## Manipulate the parameters of a wav file
+## Manipulate the parameters of a wav file and save as a new file
 For example, increase or decrease the sample rate
 ```
 f = lw.load('original.wav')
