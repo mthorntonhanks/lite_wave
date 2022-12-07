@@ -1,4 +1,3 @@
-import os
 import struct
 
 class wav_file():
@@ -160,21 +159,12 @@ def save(f : wav_file, file_name : str):
         file.write(f.format.encode())
 
         for id in f.chunk_ids:
-            if id == 'data':
-                #Write data sub-chunk
-                file.write(b'data')
+            #Write sub-chunk
+            file.write(id.encode())
+            b = struct.pack('<i', f.get_chunk_size(id))
+            file.write(b)
 
-                b = struct.pack('<i', f.get_chunk_size(id))
-                file.write(b)
-
-                file.write(f.get_chunk_data(id))
-            elif id == 'fmt ':
-                #Write fmt sub-chunk
-                file.write(b'fmt ')
-
-                b = struct.pack('<i', f.get_chunk_size(id))
-                file.write(b)
-
+            if id == 'fmt ':
                 b = struct.pack('<hhiihh', f.audio_format, f.num_channels, f.sample_rate, f.byte_rate, f.block_align, f.bits_per_sample)
                 file.write(b)
 
@@ -182,12 +172,4 @@ def save(f : wav_file, file_name : str):
                 if f.get_chunk_size(id) > 16:
                     file.write(f.get_chunk_data(id)[16:])
             else:
-                #Write other sub-chunk
-                file.write(id.encode())
-
-                b = struct.pack('<i', f.get_chunk_size(id))
-                file.write(b)
-
                 file.write(f.get_chunk_data(id))
-
-    
