@@ -35,10 +35,9 @@ lw.save(f, 'modified.wav')
 For example, reverse the sound or do whatever funky manipulations you can think of :)
 ```
 f = lw.load('original.wav')
-samples = f.data_bytes
-# Do some manipulation of the samples in your own function..
-new_samples = manipulate_samples(samples)
-f.data_bytes = new_samples
+samples = f.get_chunk_data('data')
+new_samples = my_func_to_manipulate_samples(samples)
+f.set_chunk_data('data', new_samples)
 lw.save(f, 'modified.wav')
 ```
 
