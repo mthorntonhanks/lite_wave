@@ -1,4 +1,4 @@
-# lite_wave Introduction
+# Introduction
 lite_wave is a Python module for reading and writing sound files in the WAVE format.
 
 It is intended as a stable, easy-to-use building block for manipulating wav files, without needing to know how to load a file from disk / storage, or to save a file to storage. 
@@ -10,8 +10,8 @@ We encourage contributions and enhancements which:
 
 We are not looking for contributions which 'bloat' the module beyond its basic purpose of ***reading and writing wav files***. It's the job of the user / developer to write their own modules to do funky sound manipulations :)
 
-# lite_wave Usage
-Examples of things you can do using lite_wave in your Python code include:
+# Usage
+Below are some examples of things you can do using lite_wave. You can also find example code in the automated test scripts (test_*.py). 
 
 
 ## Read a wav file to discover its parameters
