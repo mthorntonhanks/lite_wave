@@ -45,7 +45,12 @@ class wav_file():
         #data, LIST, etc: get chunk data from private list
         #fmt_: don't allow access to chunk data - use object properties instead
         return self._chunks[id]
-    
+
+    def set_chunk_data(self, id, data):
+        """Modify the data bytes of the specified chunk
+        """
+        self._chunks.update({id: data})
+        
 def load(file_name: str) -> wav_file:
     """Loads a wav file from file storage into an object and returns the object
 
