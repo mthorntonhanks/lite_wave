@@ -18,6 +18,8 @@ class wav_file():
 
         self._chunks = {}
 
+        self.byte_order = 'little'
+
     @property
     def audio_format(self):
         """1 = PCM Linear
@@ -34,6 +36,10 @@ class wav_file():
         """List of chunk IDs in the order they occur in the file
         """
         return tuple(self._chunks)
+
+    @property
+    def byte_sign(self):
+        return self.bits_per_sample == 16
 
     def get_chunk_size(self, id):
         #fmt_: don't allow access to chunk data - use object properties instead
