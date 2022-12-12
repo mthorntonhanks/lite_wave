@@ -12,16 +12,13 @@ f = lw.load(file_name)
 run_count = 0
 failed_tests = list()
 
-#Modify data chunk
-data = f.get_chunk_data('data')
-data_mod = bytearray(data)
-for index in range(0, len(data_mod), 2):
+data = f.get_sample_data()
+data_mod = bytearray(len(data) * 2)
+for index in range(len(data)):
     #Modify amplitude of this sample to 25%
-    sample = int.from_bytes(data_mod[index:index+2], byteorder='little', signed=True)
+    sample = data[index]
     sample //= 4
-    data_mod[index:index+2] = int.to_bytes(sample, 2, byteorder='little', signed=True)
-    #if not index % 100000:
-        #print('{:.1f}%'.format(index / len(data_mod) * 100))
+    data_mod[index*2:(index*2)+2] = int.to_bytes(sample, 2, byteorder='little', signed=True)
 
 f.set_chunk_data('data', data_mod)
 
@@ -63,11 +60,9 @@ run_count += 1
 if failure is not None:
     failed_tests.append(f'010 | {failure}')
 
-data_new = f_new.get_chunk_data('data')
-for index in range(0, len(data), 2):
-    sample = int.from_bytes(data[index:index+2], byteorder='little', signed=True)
-    sample_new = int.from_bytes(data_new[index:index+2], byteorder='little', signed=True)
-    if sample_new != sample // 4:
+data_new = f_new.get_sample_data()
+for index in range(len(data_new)):
+    if data_new[index] != data[index] // 4:
         failed_tests.append('020')
         break
 

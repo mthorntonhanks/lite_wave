@@ -49,7 +49,16 @@ class wav_file():
         """Modify the data bytes of the specified chunk
         """
         self._chunks.update({id: data})
-        
+
+    def get_sample_data(self):
+        sample_bytes = self._chunks['data']
+        sample_ints = []
+        for index in range(0, len(sample_bytes), 2):
+            sample = int.from_bytes(sample_bytes[index:index+2], byteorder='little', signed=True)
+            sample_ints.append(sample)
+
+        return sample_ints
+    
 def load(file_name: str) -> wav_file:
     """Loads a wav file from file storage into an object and returns the object
 
