@@ -12,6 +12,8 @@ f = lw.load(file_name)
 run_count = 0
 failed_tests = list()
 
+'''
+#Method 1: Get / modify / update samples as bytes
 data = f.get_chunk_data('data')
 byte_sign = f.byte_sign
 byte_order = f.byte_order
@@ -23,6 +25,15 @@ for index in range(0, len(data_mod), 2):
     data_mod[index:index+2] = int.to_bytes(sample, 2, byteorder=byte_order, signed=byte_sign)
 
 f.set_chunk_data('data', data_mod)
+'''
+
+#Method 2: Get / modify / update samples as integers
+data = f.get_sample_data()
+for sample in range(len(data)):
+    #Modify amplitude of this sample to 25% of original
+    data[sample] //= 4
+
+f.set_sample_data(data)
 
 #Save file as a new file
 new_file_name = 'samples/09 Track 9_new.wav'
@@ -62,11 +73,21 @@ run_count += 1
 if failure is not None:
     failed_tests.append(f'010 | {failure}')
 
+'''
+#Method 1: Get / modify / update samples as bytes
 data_new = f_new.get_chunk_data('data')
 for index in range(0, len(data), 2):
     sample = int.from_bytes(data[index:index+2], byteorder='little', signed=True)
     sample_new = int.from_bytes(data_new[index:index+2], byteorder='little', signed=True)
     if sample_new != sample // 4:
+        failed_tests.append('020')
+        break
+'''
+
+#Method 2: Get / modify / update samples as integers
+data_new = f_new.get_sample_data()
+for sample in range(len(data)):
+    if data_new[sample] != data[sample]:
         failed_tests.append('020')
         break
 

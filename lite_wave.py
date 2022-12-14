@@ -39,6 +39,9 @@ class wav_file():
 
     @property
     def byte_sign(self):
+        """True = samples are stored as signed values
+        False = data is stored as unsigned values
+        """
         return self.bits_per_sample == 16
 
     def get_chunk_size(self, id):
@@ -57,13 +60,23 @@ class wav_file():
         self._chunks.update({id: data})
 
     def get_sample_data(self):
-        sample_bytes = self._chunks['data']
-        sample_ints = []
-        for index in range(0, len(sample_bytes), 2):
-            sample = int.from_bytes(sample_bytes[index:index+2], byteorder='little', signed=True)
-            sample_ints.append(sample)
+        #If this method is slow on large files, try creating the list with the
+        #right number of elements up-front instead of using list.append
+        #It should be possible to use list comprehension for 8-bit (1 byte) samples
+        samples = []
+        for byt in range(0, len(self._chunks['data']), 2):
+            samples.append(int.from_bytes(self._chunks['data'][byt:byt+2], byteorder='little', signed=self.byte_sign))
 
-        return sample_ints
+        return samples
+
+    def set_sample_data(self, data):
+        """Modify the sample data
+        """
+        data_new = bytearray(len(data) * 2)
+        for index in range(len(data)):
+            data_new[index*2:(index*2)+2] = int.to_bytes(data[index], 2, byteorder='little', signed=self.byte_sign)
+
+        self._chunks.update({'data': data_new})
     
 def load(file_name: str) -> wav_file:
     """Loads a wav file from file storage into an object and returns the object
