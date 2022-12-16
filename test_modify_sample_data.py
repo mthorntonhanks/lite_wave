@@ -37,7 +37,6 @@ f.set_sample_data(data)
 
 #Save file as a new file
 new_file_name = 'samples/09 Track 9_new.wav'
-run_count += 1
 lw.save(f, new_file_name)
 
 #Load and verify the new file
@@ -69,7 +68,6 @@ if f_new.riff_chunk_size != f.riff_chunk_size:
     failure = 'riff_chunk_size'
 if f_new.sample_rate != f.sample_rate:
     failure = 'sample_rate'
-run_count += 1
 if failure is not None:
     failed_tests.append(f'010 | {failure}')
 
@@ -90,6 +88,7 @@ for sample in range(len(data)):
     if data_new[sample] != data[sample]:
         failed_tests.append('020')
         break
+run_count += 1
 
 print(f'Tests run: {run_count}, tests passed: {run_count - len(failed_tests)}')
 if len(failed_tests) > 0:

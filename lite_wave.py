@@ -63,20 +63,25 @@ class wav_file():
         #If this method is slow on large files, try creating the list with the
         #right number of elements up-front instead of using list.append
         #It should be possible to use list comprehension for 8-bit (1 byte) samples
-        samples = []
-        for byt in range(0, len(self._chunks['data']), 2):
-            samples.append(int.from_bytes(self._chunks['data'][byt:byt+2], byteorder='little', signed=self.byte_sign))
+        if self.bits_per_sample > 8:
+            samples = []
+            for byt in range(0, len(self._chunks['data']), 2):
+                samples.append(int.from_bytes(self._chunks['data'][byt:byt+2], byteorder='little', signed=self.byte_sign))
+        else:
+            samples = [byt8 for byt8 in self._chunks['data']]
 
         return samples
 
     def set_sample_data(self, data):
         """Modify the sample data
         """
-        data_new = bytearray(len(data) * 2)
-        for index in range(len(data)):
-            data_new[index*2:(index*2)+2] = int.to_bytes(data[index], 2, byteorder='little', signed=self.byte_sign)
-
-        self._chunks.update({'data': data_new})
+        if self.bits_per_sample == 8:
+            self._chunks.update({'data': data})
+        else:
+            data_new = bytearray(len(data) * 2)
+            for index in range(len(data)):
+                data_new[index*2:(index*2)+2] = int.to_bytes(data[index], 2, byteorder='little', signed=self.byte_sign)
+            self._chunks.update({'data': data_new})
     
 def load(file_name: str) -> wav_file:
     """Loads a wav file from file storage into an object and returns the object
