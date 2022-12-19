@@ -40,7 +40,7 @@ new_samples = my_func_to_manipulate_samples(samples)
 f.set_chunk_data('data', new_samples)
 lw.save(f, 'modified.wav')
 ```
-In the above code, *samples* and *new_samples* are byte arrays. Alternatively, integer arrays can be used with methods *get_sample_data* and *set_sample_data*. As follows:
+In the above code, ```samples``` and ```new_samples``` are byte arrays. Alternatively, integer arrays can be used with methods ```get_sample_data()``` and ```set_sample_data()``` . As follows:
 ```
 samples = f.get_sample_data()
 new_samples = my_func_to_manipulate_samples(samples)
