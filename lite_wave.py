@@ -1,10 +1,13 @@
 import struct
+import os
 
-class wav_file():
+
+class wav_file:
     """Represents an individual audio file of type WAVE
     """
-    
+
     def __init__(self):
+        self.file_duration = 0
         self.chunk_id = ''
         self.riff_chunk_size = 0
         self.format = ''
@@ -45,13 +48,13 @@ class wav_file():
         return self.bits_per_sample == 16
 
     def get_chunk_size(self, id):
-        #fmt_: don't allow access to chunk data - use object properties instead
-        #data, LIST, etc: get chunk size from private list
+        # fmt_: don't allow access to chunk data - use object properties instead
+        # data, LIST, etc: get chunk size from private list
         return len(self._chunks[id])
 
     def get_chunk_data(self, id):
-        #data, LIST, etc: get chunk data from private list
-        #fmt_: don't allow access to chunk data - use object properties instead
+        # data, LIST, etc: get chunk data from private list
+        # fmt_: don't allow access to chunk data - use object properties instead
         return self._chunks[id]
 
     def set_chunk_data(self, id, data):
@@ -60,13 +63,14 @@ class wav_file():
         self._chunks.update({id: data})
 
     def get_sample_data(self):
-        #If this method is slow on large files, try creating the list with the
-        #right number of elements up-front instead of using list.append
-        #It should be possible to use list comprehension for 8-bit (1 byte) samples
+        # If this method is slow on large files, try creating the list with the
+        # right number of elements up-front instead of using list.append
+        # It should be possible to use list comprehension for 8-bit (1 byte) samples
         if self.bits_per_sample > 8:
             samples = []
             for byt in range(0, len(self._chunks['data']), 2):
-                samples.append(int.from_bytes(self._chunks['data'][byt:byt+2], byteorder='little', signed=self.byte_sign))
+                samples.append(
+                    int.from_bytes(self._chunks['data'][byt:byt + 2], byteorder='little', signed=self.byte_sign))
         else:
             samples = [byt8 for byt8 in self._chunks['data']]
 
@@ -80,9 +84,34 @@ class wav_file():
         else:
             data_new = bytearray(len(data) * 2)
             for index in range(len(data)):
-                data_new[index*2:(index*2)+2] = int.to_bytes(data[index], 2, byteorder='little', signed=self.byte_sign)
+                data_new[index * 2:(index * 2) + 2] = int.to_bytes(data[index], 2, byteorder='little',
+                                                                   signed=self.byte_sign)
             self._chunks.update({'data': data_new})
-    
+
+    @staticmethod
+    def get_duration(data):
+        """
+        Return the duration of the wav_file (in seconds).
+
+        Parameters
+        ----------
+        data : str
+        data(file path) to be loaded from file storage
+
+        Returns
+        -------
+        duration of file in seconds
+        """
+        x = load(data)
+        fileStat = os.stat(data)
+        file_size = fileStat.st_size
+        sample_rate = x.sample_rate
+        channels = x.num_channels
+        bits_per_sample = x.bits_per_sample
+        duration = file_size / (sample_rate * channels * bits_per_sample / 8)
+        return duration
+
+
 def load(file_name: str) -> wav_file:
     """Loads a wav file from file storage into an object and returns the object
 
@@ -90,46 +119,46 @@ def load(file_name: str) -> wav_file:
     ----------
     file_name : str
         File name to be loaded from file storage
-    
+
     Returns
     -------
     wav_file
     """
 
-    #Open file
+    # Open file
     f = open(file_name, 'rb')
 
-    #Read RIFF ChunkID
+    # Read RIFF ChunkID
     f.seek(0)
     b = f.read(4)
 
     au_fi = wav_file()
     au_fi.chunk_id = b.decode()
 
-    #Read RIFF chunk size (should equal file_size - 8)
+    # Read RIFF chunk size (should equal file_size - 8)
     b = f.read(4)
     t = struct.unpack('<i', b)
     riff_chunk_size = t[0]
     au_fi.riff_chunk_size = riff_chunk_size
 
-    #Running total of bytes processed
+    # Running total of bytes processed
     run_total_bytes = 0
 
-    #Read Format
+    # Read Format
     b = f.read(4)
     run_total_bytes += 4
     au_fi.format = b.decode()
 
-    #Initialise variable-length hash map of sub-chunks
+    # Initialise variable-length hash map of sub-chunks
     chunks = {}
-    
-    #Iterate through sub-chunks
+
+    # Iterate through sub-chunks
     while run_total_bytes < riff_chunk_size:
-        #Read sub-chunk ID
+        # Read sub-chunk ID
         sub_chunk_id = f.read(4)
         run_total_bytes += 4
 
-        #Read sub-chunk size
+        # Read sub-chunk size
         b = f.read(4)
         run_total_bytes += 4
         t = struct.unpack('<i', b)
@@ -140,7 +169,7 @@ def load(file_name: str) -> wav_file:
             run_total_bytes += sub_chunk_size
 
         elif sub_chunk_id == b'fmt ':
-            #Display the audio format
+            # Display the audio format
             b = f.read(sub_chunk_size)
             run_total_bytes += sub_chunk_size
             unpack_str = '<hhiihh'
@@ -160,11 +189,12 @@ def load(file_name: str) -> wav_file:
         chunks.update({sub_chunk_id.decode(): b})
 
     au_fi._chunks = chunks
-    
+
     f.close()
     return au_fi
 
-def save(f : wav_file, file_name : str):
+
+def save(f: wav_file, file_name: str):
     """Saves a wav_file object to a new file on storage
 
     Parameters
@@ -173,35 +203,35 @@ def save(f : wav_file, file_name : str):
         Object to be saved as a new file
     file_name : str
         File name of the new file
-    
+
     Returns
     -------
     None
     """
 
     with open(file_name, 'wb') as file:
-        
 
-        #Write Chunk_ID
+        # Write Chunk_ID
         file.write(f.chunk_id.encode())
 
-        #Write RIFF chunk size (should equal file_size - 8)
+        # Write RIFF chunk size (should equal file_size - 8)
         b = struct.pack('<i', f.riff_chunk_size)
         file.write(b)
 
         file.write(f.format.encode())
 
         for id in f.chunk_ids:
-            #Write sub-chunk
+            # Write sub-chunk
             file.write(id.encode())
             b = struct.pack('<i', f.get_chunk_size(id))
             file.write(b)
 
             if id == 'fmt ':
-                b = struct.pack('<hhiihh', f.audio_format, f.num_channels, f.sample_rate, f.byte_rate, f.block_align, f.bits_per_sample)
+                b = struct.pack('<hhiihh', f.audio_format, f.num_channels, f.sample_rate, f.byte_rate, f.block_align,
+                                f.bits_per_sample)
                 file.write(b)
 
-                #If sub-chunk is more than the standard 16 bytes, write the remaining bytes
+                # If sub-chunk is more than the standard 16 bytes, write the remaining bytes
                 if f.get_chunk_size(id) > 16:
                     file.write(f.get_chunk_data(id)[16:])
             else:
