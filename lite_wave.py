@@ -83,7 +83,6 @@ class wav_file():
             for index in range(len(data)):
                 data_new[index*2:(index*2)+2] = int.to_bytes(data[index], 2, byteorder='little', signed=self.byte_sign)
             self._chunks.update({'data': data_new})
-<<<<<<< HEAD
 
     def get_duration(self):
         """  
@@ -99,9 +98,6 @@ class wav_file():
         duration = data_chunk / (sample_rate * channels * bits_per_sample / 8)
         return duration
 
-
-=======
->>>>>>> parent of 3c09e7a (Update lite_wave.py for solving issue #9)
     
 def load(file_name: str) -> wav_file:
     """Loads a wav file from file storage into an object and returns the object
@@ -118,11 +114,7 @@ def load(file_name: str) -> wav_file:
 
     #Open file
     f = open(file_name, 'rb')
-<<<<<<< HEAD
  
-=======
-
->>>>>>> parent of 3c09e7a (Update lite_wave.py for solving issue #9)
     #Read RIFF ChunkID
     f.seek(0)
     b = f.read(4)
@@ -135,11 +127,8 @@ def load(file_name: str) -> wav_file:
     t = struct.unpack('<i', b)
     riff_chunk_size = t[0]
     au_fi.riff_chunk_size = riff_chunk_size
-<<<<<<< HEAD
     au_fi.file_loc = file_name
-=======
 
->>>>>>> parent of 3c09e7a (Update lite_wave.py for solving issue #9)
     #Running total of bytes processed
     run_total_bytes = 0
 
