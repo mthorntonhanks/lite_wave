@@ -19,6 +19,7 @@ class wav_file():
         self._chunks = {}
 
         self.byte_order = 'little'
+        self.file_loc = ""
 
     @property
     def audio_format(self):
@@ -82,6 +83,21 @@ class wav_file():
             for index in range(len(data)):
                 data_new[index*2:(index*2)+2] = int.to_bytes(data[index], 2, byteorder='little', signed=self.byte_sign)
             self._chunks.update({'data': data_new})
+
+    def get_duration(self):
+        """  
+        Returns
+        -------
+        duration of file in seconds
+        """
+        f = load(self.file_loc)
+        data_chunk = f.get_chunk_size('data')
+        sample_rate = f.sample_rate
+        channels = f.num_channels
+        bits_per_sample = f.bits_per_sample
+        duration = data_chunk / (sample_rate * channels * bits_per_sample / 8)
+        return duration
+
     
 def load(file_name: str) -> wav_file:
     """Loads a wav file from file storage into an object and returns the object
@@ -98,7 +114,7 @@ def load(file_name: str) -> wav_file:
 
     #Open file
     f = open(file_name, 'rb')
-
+ 
     #Read RIFF ChunkID
     f.seek(0)
     b = f.read(4)
@@ -111,6 +127,7 @@ def load(file_name: str) -> wav_file:
     t = struct.unpack('<i', b)
     riff_chunk_size = t[0]
     au_fi.riff_chunk_size = riff_chunk_size
+    au_fi.file_loc = file_name
 
     #Running total of bytes processed
     run_total_bytes = 0
