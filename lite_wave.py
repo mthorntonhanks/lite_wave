@@ -113,72 +113,71 @@ def load(file_name: str) -> wav_file:
     """
 
     #Open file
-    f = open(file_name, 'rb')
+    with open(file_name, 'rb') as f:
  
-    #Read RIFF ChunkID
-    f.seek(0)
-    b = f.read(4)
+        #Read RIFF ChunkID
+        f.seek(0)
+        b = f.read(4)
 
-    au_fi = wav_file()
-    au_fi.chunk_id = b.decode()
+        au_fi = wav_file()
+        au_fi.chunk_id = b.decode()
 
-    #Read RIFF chunk size (should equal file_size - 8)
-    b = f.read(4)
-    t = struct.unpack('<i', b)
-    riff_chunk_size = t[0]
-    au_fi.riff_chunk_size = riff_chunk_size
-    au_fi.file_loc = file_name
+        #Read RIFF chunk size (should equal file_size - 8)
+        b = f.read(4)
+        t = struct.unpack('<i', b)
+        riff_chunk_size = t[0]
+        au_fi.riff_chunk_size = riff_chunk_size
+        au_fi.file_loc = file_name
 
-    #Running total of bytes processed
-    run_total_bytes = 0
+        #Running total of bytes processed
+        run_total_bytes = 0
 
-    #Read Format
-    b = f.read(4)
-    run_total_bytes += 4
-    au_fi.format = b.decode()
-
-    #Initialise variable-length hash map of sub-chunks
-    chunks = {}
-    
-    #Iterate through sub-chunks
-    while run_total_bytes < riff_chunk_size:
-        #Read sub-chunk ID
-        sub_chunk_id = f.read(4)
-        run_total_bytes += 4
-
-        #Read sub-chunk size
+        #Read Format
         b = f.read(4)
         run_total_bytes += 4
-        t = struct.unpack('<i', b)
-        sub_chunk_size = t[0]
+        au_fi.format = b.decode()
 
-        if sub_chunk_id == b'data':
-            b = f.read(sub_chunk_size)
-            run_total_bytes += sub_chunk_size
+        #Initialise variable-length hash map of sub-chunks
+        chunks = {}
+        
+        #Iterate through sub-chunks
+        while run_total_bytes < riff_chunk_size:
+            #Read sub-chunk ID
+            sub_chunk_id = f.read(4)
+            run_total_bytes += 4
 
-        elif sub_chunk_id == b'fmt ':
-            #Display the audio format
-            b = f.read(sub_chunk_size)
-            run_total_bytes += sub_chunk_size
-            unpack_str = '<hhiihh'
-            t = struct.unpack(unpack_str, b[:16])
+            #Read sub-chunk size
+            b = f.read(4)
+            run_total_bytes += 4
+            t = struct.unpack('<i', b)
+            sub_chunk_size = t[0]
 
-            au_fi.audio_format = t[0]
-            au_fi.num_channels = t[1]
-            au_fi.sample_rate = t[2]
-            au_fi.byte_rate = t[3]
-            au_fi.block_align = t[4]
-            au_fi.bits_per_sample = t[5]
+            if sub_chunk_id == b'data':
+                b = f.read(sub_chunk_size)
+                run_total_bytes += sub_chunk_size
 
-        else:
-            b = f.read(sub_chunk_size)
-            run_total_bytes += sub_chunk_size
+            elif sub_chunk_id == b'fmt ':
+                #Display the audio format
+                b = f.read(sub_chunk_size)
+                run_total_bytes += sub_chunk_size
+                unpack_str = '<hhiihh'
+                t = struct.unpack(unpack_str, b[:16])
 
-        chunks.update({sub_chunk_id.decode(): b})
+                au_fi.audio_format = t[0]
+                au_fi.num_channels = t[1]
+                au_fi.sample_rate = t[2]
+                au_fi.byte_rate = t[3]
+                au_fi.block_align = t[4]
+                au_fi.bits_per_sample = t[5]
+
+            else:
+                b = f.read(sub_chunk_size)
+                run_total_bytes += sub_chunk_size
+
+            chunks.update({sub_chunk_id.decode(): b})
 
     au_fi._chunks = chunks
     
-    f.close()
     return au_fi
 
 def save(f : wav_file, file_name : str):
