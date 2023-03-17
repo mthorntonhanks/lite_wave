@@ -58,7 +58,13 @@ class wav_file():
     def set_chunk_data(self, id, data):
         """Modify the data bytes of the specified chunk
         """
+        current_len = len(self._chunks[id])
+        
         self._chunks.update({id: data})
+
+        if id == 'data' and len(data) != current_len:
+            #Re-calculate the riff_chunk_size
+            self.riff_chunk_size += (len(data) - current_len)
 
     def get_sample_data(self):
         #If this method is slow on large files, try creating the list with the
