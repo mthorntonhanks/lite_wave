@@ -56,7 +56,8 @@ class wav_file():
         return self._chunks[id]
 
     def set_chunk_data(self, id, data):
-        """Modify the data bytes of the specified chunk
+        """Modify the data bytes of the specified chunk.
+        If the length of the chunk has changed, the riff_chunk_size attribute will also change
         """
         current_len = len(self._chunks[id])
         
